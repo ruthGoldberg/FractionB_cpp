@@ -8,32 +8,30 @@ using namespace std;
 
 Fraction::Fraction():numerator(0),denominator(1){}
 
-Fraction::Fraction(int numerator, int denominator) {
+Fraction::Fraction(int numerator, int denominator):numerator(numerator),denominator(denominator) {
     if (denominator == 0) {
         throw invalid_argument("Error: denominator can not be zero");
     }
-    int gcdResult = gcd(numerator, denominator);
-    this->numerator = numerator / gcdResult;
-    this->denominator = denominator / gcdResult;
-    if(this->denominator<0){
-        this->denominator = this->denominator * (-1);
-        this->numerator = this->numerator * (-1);
-    }
+    reduction();
 }
 Fraction::Fraction(float decimal):numerator(decimal*1000),denominator(1000) {
-    int gcdResult = gcd(numerator, denominator);
-    this->numerator = numerator / gcdResult;
-    this->denominator = denominator / gcdResult;
+    reduction();
+}
+void Fraction :: reduction(){
+    int gcdResult = gcd(this->numerator, this->denominator);
+    if(this->denominator<0){
+        this->denominator = this->denominator * (-1) / gcdResult;
+        this->numerator = this->numerator * (-1) / gcdResult;
+    }else{
+        this->numerator = this->numerator / gcdResult;
+        this->denominator = this->denominator / gcdResult;
+    }
 }
 void check_overflow(long num1 , long num2){
-    int max_int = std::numeric_limits<int>::max();
-    int min_int = std::numeric_limits<int>::min();
     if(num1 > INT_MAX || num2 > INT_MAX){
-        cout<<"I am here2"<<endl;
         throw overflow_error("There is a number larger than integer");
     }
     if(num1 < INT_MIN || num2 < INT_MIN){
-        cout<<"I am here3"<<endl;
         throw overflow_error("There is a number smallest than integer");
     }
 } 
@@ -49,56 +47,49 @@ int Fraction::gcd(int num1, int num2) {
     }
 }
 
-Fraction Fraction::toFraction(const float decimal)const {
-    int numerator = decimal*1000;
-    return Fraction(numerator , 1000);
-}
-
 float ariel::toFloat(const Fraction& fraction){
-    //cout<<fraction<<endl;
     float num = (float)(fraction.getNumerator()) / (fraction.getDenominator());
     return round(num*1000)/1000;
 }
 
 Fraction Fraction:: operator+(const Fraction &other) const {
-    if(this->denominator == other.getDenominator()){
-        long newNumerator = static_cast<long>(this->numerator+other.getNumerator());
-        long newDenominator = static_cast<long>(this->denominator);
-        check_overflow(newNumerator , newDenominator);
-        return Fraction(newNumerator , newDenominator);
-    }
-    int newNumerator = this->numerator * other.getDenominator() + this->denominator * other.getNumerator();
-    int newDenominator = this->denominator * other.getDenominator();
-    check_overflow(static_cast<long>(newNumerator) , static_cast<long>(newDenominator));
+    // if(this->denominator == other.getDenominator()){
+    //     long newNumerator = static_cast<long>(this->numerator)+other.getNumerator();
+    //     long newDenominator = static_cast<long>(this->denominator);
+    //     check_overflow(newNumerator , newDenominator);
+    //     return Fraction(newNumerator , newDenominator);
+    // }
+    long newNumerator = static_cast<long>(this->numerator) * other.getDenominator() + this->denominator * other.getNumerator();
+    long newDenominator = static_cast<long>(this->denominator) * other.getDenominator();
+    check_overflow(newNumerator , newDenominator);
     return Fraction(newNumerator , newDenominator);
 }
 
 Fraction Fraction::operator+(const float number) const {
-    float frac = toFloat(*this);
-    Fraction f(frac +number);
-    check_overflow(f.getNumerator() , f.getDenominator());
-    return f;
-}
-
-std::ostream &ariel::operator<<(std::ostream &output, const ariel::Fraction &fraction) {
-    output << fraction.getNumerator() << "/" << fraction.getDenominator();
-    return output;
+    float decimal = toFloat(*this);
+    Fraction frac(decimal +number);
+    check_overflow(frac.getNumerator() , frac.getDenominator());
+    return frac;
 }
 
 Fraction ariel::operator+(float number, const Fraction &other) {
     return other + number;
 }
 Fraction Fraction:: operator- (const Fraction& other)const{
-    if(denominator == other.getDenominator()){
-        return Fraction(numerator-other.getNumerator() , denominator);
-    }
-    int newNumerator = this->numerator * other.getDenominator() - this->denominator * other.getNumerator();
-    int newDenominator = this->denominator * other.getDenominator();
+    // if(denominator == other.getDenominator()){
+    //     long newNumerator = static_cast<long>(this->numerator)-other.getNumerator();
+    //     long newDenominator = static_cast<long>(this->denominator);
+    //     check_overflow(newNumerator , newDenominator);
+    //     return Fraction(newNumerator , newDenominator);
+    // }
+    long newNumerator = static_cast<long>( this->numerator ) * other.getDenominator() - this->denominator * other.getNumerator();
+    long newDenominator = static_cast<long>(this->denominator) * other.getDenominator();
+    check_overflow(newNumerator , newDenominator);
     return Fraction(newNumerator , newDenominator);
 }
 Fraction Fraction:: operator- (const float number)const{
-    float frac = toFloat(*this);
-    return Fraction(frac - number);
+    Fraction f(number);
+    return *this - f;
 }
 Fraction ariel::operator-(float number, const Fraction &other) {
     return -1*(other - number);
@@ -112,7 +103,7 @@ Fraction Fraction:: operator/ (const Fraction& other)const{
 Fraction Fraction:: operator/ (const float number)const{
     if(number == 0)
         throw runtime_error("can not divide by 0");
-    Fraction f = toFraction(number);
+    Fraction f (number);
     return (*this) / f;
 }
 Fraction ariel::operator/(float number, const Fraction &other) {
@@ -120,10 +111,13 @@ Fraction ariel::operator/(float number, const Fraction &other) {
     return f * number;
 }
 Fraction Fraction::operator* (const Fraction& other)const{
-    return Fraction(this->numerator * other.getNumerator() ,this->denominator * other.getDenominator() );
+    long newNumerator = static_cast<long>(this->numerator) * other.getNumerator();
+    long newDenominator = static_cast<long>(this->denominator) * other.getDenominator();
+    check_overflow(newNumerator , newDenominator);
+    return Fraction(newNumerator ,newDenominator);
 }
 Fraction Fraction::operator* (const float number)const{
-    Fraction f = toFraction(number);
+    Fraction f(number);
     return (*this) * f;
 }
 
@@ -199,7 +193,7 @@ Fraction Fraction::operator-- (){
 }
 Fraction Fraction::operator-- (int){
     Fraction temp = *this;
-    *this = *this - 1;
+    --(*this);
     return temp;
 
 }
@@ -209,8 +203,13 @@ Fraction Fraction::operator++ (){
 }
 Fraction Fraction::operator++ (int){
     Fraction temp = *this;
-    *this = *this +1;   
+    ++(*this) ;   
     return temp;
+}
+
+std::ostream &ariel::operator<<(std::ostream &output, const ariel::Fraction &fraction) {
+    output << fraction.getNumerator() << "/" << fraction.getDenominator();
+    return output;
 }
 
 std::ostream& ariel:: operator<<(std::ostream& os, const bool b) {
@@ -225,12 +224,13 @@ std::istream& ariel::operator>>(std::istream& is, Fraction& fraction) {
     }
     if (is.fail()) {
         throw runtime_error("Error: Input stream does not contain two integers.");
-    } if(denominator<0){
-        denominator *=(-1);
-        numerator *=(-1);
-    }
+     } //if(denominator<0){
+    //     denominator *=(-1);
+    //     numerator *=(-1);
+    // }
     fraction.numerator = numerator;
     fraction.denominator = denominator;
+    fraction.reduction();
     return is;
 }
 

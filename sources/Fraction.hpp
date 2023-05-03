@@ -6,7 +6,7 @@ namespace ariel{
         int numerator;
         int denominator;
         int gcd(int num1 , int num2);
-        Fraction toFraction(float decimal)const;
+        void reduction ();
     public:
         Fraction();
         Fraction(int numerator , int denominator);
