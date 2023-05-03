@@ -5,8 +5,8 @@ namespace ariel{
     private:
         int numerator;
         int denominator;
-        int gcd(int num1 , int num2);
         void reduction ();
+        float toFloat()const;
     public:
         Fraction();
         Fraction(int numerator , int denominator);
@@ -56,7 +56,7 @@ namespace ariel{
         Fraction operator++ ();
         Fraction operator++ (int);
 
-        friend float toFloat(const Fraction& fraction);
+        //friend float toFloat(const Fraction& fraction);
         friend std::ostream& operator<< (std::ostream& output, const Fraction& fraction);
         int getNumerator()const{
             return numerator;
@@ -65,7 +65,7 @@ namespace ariel{
         int getDenominator()const{
             return denominator;
         }
-        
+
         friend std::istream& operator>>(std::istream& input, Fraction& fraction);
     };
 }

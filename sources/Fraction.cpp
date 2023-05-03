@@ -5,6 +5,17 @@
 #include <climits>
 using namespace ariel;
 using namespace std;
+int gcd(int num1, int num2) {
+    if(num1 < 0)
+        num1 *= (-1);
+    if(num2 < 0)
+        num2 *= (-1);
+    if (num2 == 0) {
+        return num1;
+    } else {
+        return gcd(num2, num1 % num2);
+    }
+}
 
 Fraction::Fraction():numerator(0),denominator(1){}
 
@@ -35,20 +46,9 @@ void check_overflow(long num1 , long num2){
         throw overflow_error("There is a number smallest than integer");
     }
 } 
-int Fraction::gcd(int num1, int num2) {
-    if(num1 < 0)
-        num1 *= (-1);
-    if(num2 < 0)
-        num2 *= (-1);
-    if (num2 == 0) {
-        return num1;
-    } else {
-        return gcd(num2, num1 % num2);
-    }
-}
 
-float ariel::toFloat(const Fraction &fraction){
-        float num = (float)(fraction.getNumerator()) / (fraction.getDenominator());
+float Fraction:: toFloat()const{
+        float num = (float)(this->numerator) / (this->denominator);
         return round(num*1000)/1000;
 }
 
@@ -61,7 +61,7 @@ Fraction Fraction:: operator+(const Fraction &other) const {
 }
 
 Fraction Fraction::operator+(const float number) const {
-    float decimal = toFloat(*this);
+    float decimal = toFloat();
     Fraction frac(decimal +number);
     check_overflow(frac.getNumerator() , frac.getDenominator());
     return frac;
@@ -114,24 +114,24 @@ Fraction ariel::operator*(float number, const Fraction &other) {
     return other * number;
 }
 bool Fraction::operator>= (const Fraction& other)const{
-    float num1 = toFloat(*this);
-    float num2 = toFloat(other);
+    float num1 = toFloat();
+    float num2 = other.toFloat();
     return num1 >= num2;
 }
 bool Fraction::operator>= (float number)const{
-    float num1 = toFloat(*this);
+    float num1 = toFloat();
     return num1 >= number;
 }
 bool ariel::operator>=(float number, const Fraction &other) {
     return other <= number;
 }
 bool Fraction::operator> (const Fraction& other)const{
-    float num1 = toFloat(*this);
-    float num2 = toFloat(other);
+    float num1 = toFloat();
+    float num2 = other.toFloat();
     return num1 > num2;
 }
 bool Fraction::operator> (const float number)const{
-    float num1 = toFloat(*this);
+    float num1 = toFloat();
     return num1 > number;
 }
 bool ariel::operator>(float number, const Fraction &other) {
@@ -142,34 +142,34 @@ bool ariel::operator<=(float number, const Fraction &other) {
     return other >= number;
 }
 bool Fraction::operator<= (const Fraction& other)const{
-    float num1 = toFloat(*this);
-    float num2 = toFloat(other);
+    float num1 = toFloat();
+    float num2 = other.toFloat();
     return num1 <= num2;
 }
 bool Fraction::operator<=(const float number)const{
-    float num1 = toFloat(*this);
+    float num1 = toFloat();
     return num1 <= number;
 }
 bool Fraction::operator< (const Fraction& other)const{
-    float num1 = toFloat(*this);
-    float num2 = toFloat(other);
+    float num1 = toFloat();
+    float num2 = other.toFloat();
     return num1 < num2;
 }
 bool Fraction::operator<(const float number)const{
-    float num1 = toFloat(*this);
+    float num1 = toFloat();
     return num1 < number;
 }
 bool ariel::operator<(float number, const Fraction &other) {
     return other > number;
 }
 bool Fraction::operator == (const Fraction& other)const{
-    float frac1 = toFloat(*this);
-    float frac2 = toFloat(other);
+    float frac1 = toFloat();
+    float frac2 = other.toFloat();
     return frac1 == frac2;
     
 }
 bool Fraction::operator==(const float number)const{
-    float num = toFloat(*this);
+    float num = toFloat();
     return num == number;
 }
 bool ariel:: operator== (float number, const Fraction& other){
@@ -210,19 +210,20 @@ std::ostream &ariel::operator<<(std::ostream &output, const ariel::Fraction &fra
     return output;
 }
 
-std::istream& ariel::operator>>(std::istream& is, Fraction& fraction) {
-    int numerator, denominator;
-    is >> numerator >> denominator;
-    if(denominator == 0){
+std::istream& ariel::operator>>(std::istream& input, Fraction& fraction) {
+    int numeratorIN, denominatorIN;
+    input >> numeratorIN >> denominatorIN;
+    if(denominatorIN == 0){
         throw runtime_error("Error: denominator can not be zero");
     }
-    if (is.fail()) {
+    if (input.fail()) {
         throw runtime_error("Error: Input stream does not contain two integers.");
     } 
-    fraction.numerator = numerator;
-    fraction.denominator = denominator;
+    fraction.numerator = numeratorIN;
+    fraction.denominator = denominatorIN;
     fraction.reduction();
-    return is;
+    return input;
 }
+
 
 
