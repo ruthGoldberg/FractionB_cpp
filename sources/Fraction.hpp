@@ -54,7 +54,6 @@ namespace ariel{
 
         friend float toFloat(const Fraction& fraction) ;
         friend std::ostream& operator<< (std::ostream& output, const Fraction& fraction);
-        
         int getNumerator()const{
             return numerator;
         }
