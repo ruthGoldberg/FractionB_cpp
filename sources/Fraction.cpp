@@ -5,6 +5,7 @@
 #include <climits>
 using namespace ariel;
 using namespace std;
+
 int gcd(int num1, int num2) {
     if(num1 < 0)
         num1 *= (-1);
@@ -61,10 +62,8 @@ Fraction Fraction:: operator+(const Fraction &other) const {
 }
 
 Fraction Fraction::operator+(const float number) const {
-    float decimal = toFloat();
-    Fraction frac(decimal +number);
-    check_overflow(frac.getNumerator() , frac.getDenominator());
-    return frac;
+    Fraction f(number);
+    return *this + f;
 }
 
 Fraction ariel::operator+(float number, const Fraction &other) {
@@ -80,9 +79,12 @@ Fraction Fraction:: operator- (const float number)const{
     Fraction f(number);
     return *this - f;
 }
+
 Fraction ariel::operator-(float number, const Fraction &other) {
     return -1*(other - number);
 }
+
+
 Fraction Fraction:: operator/ (const Fraction& other)const{
     if(other.getNumerator() == 0)
         throw runtime_error("can not divide by 0");
